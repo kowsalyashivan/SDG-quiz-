@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SDG Tracker Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      text-align: center;
+      padding: 20px;
+    }
+    #quizBox, #resultBox, #nameList { display: none; }
+    .question { font-weight: bold; margin: 20px 0; }
+    .btn { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    .green { background-color: #4CAF50; color: white; }
+    .orange { background-color: #FF9800; color: white; }
+    .shower {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 999;
+    }
+    .confetti {
+      width: 10px; height: 10px;
+      position: absolute;
+      animation: fall 3s linear infinite;
+    }
+    @keyframes fall {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(100vh); }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🌍 SDG Tracker Quiz</h1>
+  <div id="startBox">
+    <p>Enter your name to begin:</p>
+    <input type="text" id="playerName" />
+    <button onclick="startQuiz()">Start Quiz</button>
+  </div>
+
+  <div id="quizBox">
+    <div class="question" id="questionText"></div>
+    <div id="answerButtons"></div>
+    <p>Score: <span id="score">0</span></p>
+  </div>
+
+  <div id="resultBox">
+    <h2 id="resultMessage"></h2>
+    <div id="nameList">
+      <h3>🎓 Players Who Completed the Quiz:</h3>
+      <ul id="players"></ul>
+    </div>
+  </div>
+
+  <div class="shower" id="confettiShower"></div>
+
+  <script>
+    const questions = [
+      { q: "Which SDG focuses on clean water?", a: ["SDG 6", "SDG 3", "SDG 13"], correct: 0 },
+      { q: "Goal 4 promotes what?", a: ["Quality Education", "Zero Hunger", "Climate Action"], correct: 0 },
+      { q: "Which goal targets gender equality?", a: ["SDG 5", "SDG 10", "SDG 2"], correct: 0 },
+      { q: "SDG 13 is about?", a: ["Climate Action", "Life Below Water", "Decent Work"], correct: 0 },
+      { q: "Which SDG aims to end poverty?", a: ["SDG 1", "SDG 8", "SDG 16"], correct: 0 },
+      { q: "Goal 3 is about?", a: ["Good Health", "Clean Energy", "Peace"], correct: 0 },
+      { q: "Which SDG promotes sustainable cities?", a: ["SDG 11", "SDG 9", "SDG 14"], correct: 0 },
+      { q: "SDG 7 focuses on?", a: ["Affordable Energy", "Clean Water", "Education"], correct: 0 },
+      { q: "Goal 14 is about?", a: ["Life Below Water", "Life on Land", "Climate"], correct: 0 },
+      { q: "SDG 10 addresses?", a: ["Reduced Inequalities", "Zero Hunger", "Clean Energy"], correct: 0 },
+      { q: "Which goal promotes peace and justice?", a: ["SDG 16", "SDG 12", "SDG 4"], correct: 0 },
+      { q: "SDG 8 is about?", a: ["Decent Work", "Clean Water", "Gender Equality"], correct: 0 }
+    ];
+
+    let shuffled = [], current = 0, score = 0, player = "", playedNames = [];
+
+    function startQuiz() {
+      player = document.getElementById("playerName").value.trim();
+      if (!player) return alert("Please enter your name!");
+      shuffled = questions.sort(() => 0.5 - Math.random()).slice(0, 10);
+      document.getElementById("startBox").style.display = "none";
+      document.getElementById("quizBox").style.display = "block";
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = shuffled[current];
+      document.getElementById("questionText").innerText = q.q;
+      const btns = document.getElementById("answerButtons");
+      btns.innerHTML = "";
+      q.a.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.className = "btn";
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(i);
+        btns.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(i) {
+      if (i === shuffled[current].correct) score++;
+      document.getElementById("score").innerText = score;
+      current++;
+      if (current < shuffled.length) {
+        showQuestion();
+      } else {
+        endQuiz();
+      }
+    }
+
+    function endQuiz() {
+      document.getElementById("quizBox").style.display = "none";
+      document.getElementById("resultBox").style.display = "block";
+      let msg = "";
+      const result = document.getElementById("resultMessage");
+      if (score >= 8) {
+        msg = `🌟 Bravo ${player}! You scored ${score}/10`;
+        result.className = "green";
+        launchConfetti(["gold", "chocolate"]);
+      } else if (score >= 6) {
+        msg = `🧡 Well done ${player}! You scored ${score}/10`;
+        result.className = "orange";
+      } else {
+        msg = `Keep learning, ${player}. You scored ${score}/10`;
+        result.className = "";
+      }
+      result.innerText = msg;
+      playedNames.push(player);
+      updateNameList();
+    }
+
+    function updateNameList() {
+      document.getElementById("nameList").style.display = "block";
+      const list = document.getElementById("players");
+      list.innerHTML = "";
+      playedNames.forEach(name => {
+        const li = document.createElement("li");
+        li.innerText = name;
+        list.appendChild(li);
+      });
+    }
+
+    function launchConfetti(colors) {
+      const shower = document.getElementById("confettiShower");
+      for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement("div");
+        confetti.className = "confetti";
+        confetti.style.left = Math.random() * 100 + "vw";
+        confetti.style.top = "-10px";
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        shower.appendChild(confetti);
+      }
+      setTimeout(() => shower.innerHTML = "", 3000);
+    }
+  </script>
+</body>
+</html>
